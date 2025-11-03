@@ -1,0 +1,23 @@
+# FastAPI and Web Server
+fastapi>=0.104.0
+uvicorn[standard]>=0.24.0
+python-multipart>=0.0.6
+
+# Database
+sqlalchemy>=2.0.0
+
+# AWS S3
+boto3>=1.28.0
+
+# Validation and Configuration
+pydantic>=2.0.0
+python-dotenv>=1.0.0
+
+# Image Processing
+pillow>=10.0.0
+
+# Optional: For PostgreSQL support
+# psycopg2-binary>=2.9.0
+
+# Optional: For production deployment
+# gunicorn>=21.0.0

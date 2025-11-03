@@ -1,0 +1,39 @@
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: nsfw-backend
+    ports:
+      - "8001:8001"
+    environment:
+      - USE_LOCAL_STORAGE=true
+      - LOCAL_UPLOAD_DIR=uploads/images
+      - DATABASE_URL=sqlite:///./nsfw_assets.db
+    volumes:
+      - ./backend/uploads:/app/uploads
+      - ./backend/nsfw_assets.db:/app/nsfw_assets.db
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8001/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: nsfw-frontend
+    ports:
+      - "7860:7860"
+    environment:
+      - API_URL=http://backend:8001
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  uploads:
+  db:
