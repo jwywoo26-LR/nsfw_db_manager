@@ -18,8 +18,8 @@ import pandas as pd
 API_URL = os.getenv("API_URL", "http://127.0.0.1:8001")
 
 # Dropdown Options
-ANGLE_1_OPTIONS = ["above", "below"]
-ANGLE_2_OPTIONS = ["front", "behind", "side"]
+ANGLE_1_OPTIONS = ["", "above", "below"]
+ANGLE_2_OPTIONS = ["", "front", "back", "side"]
 
 # TODO: Add your action options here
 # Example: ACTION_1_OPTIONS = ["standing", "sitting", "lying", "walking"]
@@ -33,8 +33,8 @@ def upload_image(
     angle_1: str,
     angle_2: str,
     action_1: str,
-    action_2: str,
-    action_3: str,
+    # action_2: str,  # Removed
+    # action_3: str,  # Removed
     prompt: str
 ) -> Tuple[str, str]:
     """
@@ -63,10 +63,11 @@ def upload_image(
             params['angle_2'] = angle_2
         if action_1:
             params['action_1'] = action_1
-        if action_2:
-            params['action_2'] = action_2
-        if action_3:
-            params['action_3'] = action_3
+        # action_2 and action_3 removed
+        # if action_2:
+        #     params['action_2'] = action_2
+        # if action_3:
+        #     params['action_3'] = action_3
         if prompt:
             params['prompt'] = prompt
 
@@ -453,21 +454,23 @@ with gr.Blocks(title="NSFW Image Asset Manager", theme=gr.themes.Soft()) as app:
                     with gr.Row():
                         upload_angle_1 = gr.Dropdown(
                             choices=ANGLE_1_OPTIONS,
-                            label="Angle 1 (Optional)",
+                            label="Angle 1",
+                            value="",
                             allow_custom_value=True
                         )
                         upload_angle_2 = gr.Dropdown(
                             choices=ANGLE_2_OPTIONS,
                             label="Angle 2 (Required)",
+                            value="",
                             allow_custom_value=True
                         )
-                        # TODO: Replace with Dropdown when ACTION options are defined
-                        # upload_action_1 = gr.Dropdown(choices=ACTION_1_OPTIONS, label="Action 1", allow_custom_value=True)
-                        upload_action_1 = gr.Textbox(label="Action 1 (Required)", placeholder="Required")
-                        upload_action_2 = gr.Textbox(label="Action 2 (Optional)", placeholder="Optional")
-                        upload_action_3 = gr.Textbox(label="Action 3 (Optional)", placeholder="Optional")
+                        # Action 1 is required
+                        upload_action_1 = gr.Textbox(label="Action 1 (Required)", placeholder="Required", value="")
+                        # Action 2 and 3 are removed/commented out
+                        # upload_action_2 = gr.Textbox(label="Action 2 (Optional)", placeholder="Optional")
+                        # upload_action_3 = gr.Textbox(label="Action 3 (Optional)", placeholder="Optional")
 
-                    upload_prompt = gr.Textbox(label="Prompt (Required)", placeholder="Required description or generation prompt", lines=2)
+                    upload_prompt = gr.Textbox(label="Prompt (Required)", placeholder="Required", value="", lines=2)
 
                     upload_btn = gr.Button("📤 Upload Image", variant="primary")
                     upload_output = gr.Textbox(label="Upload Status", interactive=False)
@@ -486,7 +489,7 @@ with gr.Blocks(title="NSFW Image Asset Manager", theme=gr.themes.Soft()) as app:
             # Upload and show the uploaded image in preview
             upload_btn.click(
                 fn=upload_image,
-                inputs=[upload_file, upload_angle_1, upload_angle_2, upload_action_1, upload_action_2, upload_action_3, upload_prompt],
+                inputs=[upload_file, upload_angle_1, upload_angle_2, upload_action_1, upload_prompt],
                 outputs=[upload_output, upload_preview]
             )
 
