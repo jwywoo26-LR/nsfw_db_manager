@@ -12,7 +12,8 @@ services:
       - DATABASE_URL=sqlite:///./nsfw_assets.db
     volumes:
       - ./backend/uploads:/app/uploads
-      - ./backend/nsfw_assets.db:/app/nsfw_assets.db
+      # Database file mount - optional, uncomment to persist DB on host
+      # - ./backend/nsfw_assets.db:/app/nsfw_assets.db
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8001/api/health"]

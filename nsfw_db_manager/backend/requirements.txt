@@ -16,6 +16,10 @@ python-dotenv>=1.0.0
 # Image Processing
 pillow>=10.0.0
 
+# Data Processing (for bulk upload)
+pandas>=2.0.0
+requests>=2.31.0
+
 # Optional: For PostgreSQL support
 # psycopg2-binary>=2.9.0
 
