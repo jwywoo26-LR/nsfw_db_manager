@@ -9,6 +9,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy application code
 COPY gradio_app.py .
+COPY src/ ./src/
 
 # Expose port
 EXPOSE 7860
