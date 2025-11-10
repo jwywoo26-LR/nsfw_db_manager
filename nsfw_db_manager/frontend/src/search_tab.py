@@ -10,7 +10,9 @@ from .config import API_URL, ANGLE_1_OPTIONS, ANGLE_2_OPTIONS
 
 
 # Global cache to store asset metadata for clicked images
+# Using index-based cache instead of path-based since Gradio moves temp files
 _search_results_cache = {}
+_search_results_list = []  # Ordered list of assets matching search results
 
 
 def search_images(
@@ -24,8 +26,9 @@ def search_images(
     Search for images based on metadata filters
     Returns (list of image paths, status message)
     """
-    global _search_results_cache
+    global _search_results_cache, _search_results_list
     _search_results_cache.clear()  # Clear previous results
+    _search_results_list.clear()  # Clear previous list
 
     try:
         # Build query parameters
@@ -69,8 +72,8 @@ def search_images(
                         temp_file.write(img_response.content)
                         temp_file.close()
 
-                        # Cache the asset metadata with the temp file path as key
-                        _search_results_cache[temp_file.name] = asset
+                        # Store asset in ordered list (index-based access)
+                        _search_results_list.append(asset)
 
                         image_paths.append(temp_file.name)
                     else:
@@ -101,34 +104,24 @@ def on_image_select(evt: gr.SelectData) -> Tuple[Optional[str], str]:
     Returns:
         Tuple of (image_path, metadata_markdown)
     """
-    global _search_results_cache
+    global _search_results_list
 
     try:
-        # Get the image path from the event
-        # evt.value contains the image path or dict with image info
+        # Use the index to look up the asset from the ordered list
         # evt.index is the index in the gallery
+        index = evt.index
 
-        # Try different ways to extract the path
-        image_path = None
-        if isinstance(evt.value, str):
-            image_path = evt.value
-        elif isinstance(evt.value, dict):
-            # Try different dict structures
+        if index is None or index >= len(_search_results_list):
+            return None, f"❌ Invalid index: {index}. Results list has {len(_search_results_list)} items."
+
+        asset = _search_results_list[index]
+
+        # Get the image path for display
+        image_path = evt.value
+        if isinstance(evt.value, dict):
             image_path = evt.value.get('image', {}).get('path') if isinstance(evt.value.get('image'), dict) else evt.value.get('image')
             if not image_path:
                 image_path = evt.value.get('path')
-
-        if not image_path:
-            # Debug info
-            return None, f"❌ Could not retrieve image path. Event value type: {type(evt.value)}, Value: {str(evt.value)[:100]}"
-
-        # Look up the asset metadata from cache
-        if image_path not in _search_results_cache:
-            # Show available keys for debugging
-            cache_keys = list(_search_results_cache.keys())[:3]
-            return image_path, f"⚠️ Metadata not found in cache.\nLooking for: {image_path}\nCache has {len(_search_results_cache)} entries.\nSample keys: {cache_keys}"
-
-        asset = _search_results_cache[image_path]
 
         # Format the metadata as beautiful markdown with emojis and better styling
         angle_1 = asset.get('angle_1') or '—'
