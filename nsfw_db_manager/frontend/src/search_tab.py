@@ -105,15 +105,28 @@ def on_image_select(evt: gr.SelectData) -> Tuple[Optional[str], str]:
 
     try:
         # Get the image path from the event
-        # evt.value is the image path, evt.index is the index in the gallery
-        image_path = evt.value.get('image', {}).get('path') if isinstance(evt.value, dict) else None
+        # evt.value contains the image path or dict with image info
+        # evt.index is the index in the gallery
+
+        # Try different ways to extract the path
+        image_path = None
+        if isinstance(evt.value, str):
+            image_path = evt.value
+        elif isinstance(evt.value, dict):
+            # Try different dict structures
+            image_path = evt.value.get('image', {}).get('path') if isinstance(evt.value.get('image'), dict) else evt.value.get('image')
+            if not image_path:
+                image_path = evt.value.get('path')
 
         if not image_path:
-            return None, "❌ Could not retrieve image information"
+            # Debug info
+            return None, f"❌ Could not retrieve image path. Event value type: {type(evt.value)}, Value: {str(evt.value)[:100]}"
 
         # Look up the asset metadata from cache
         if image_path not in _search_results_cache:
-            return image_path, "⚠️ Metadata not found in cache"
+            # Show available keys for debugging
+            cache_keys = list(_search_results_cache.keys())[:3]
+            return image_path, f"⚠️ Metadata not found in cache.\nLooking for: {image_path}\nCache has {len(_search_results_cache)} entries.\nSample keys: {cache_keys}"
 
         asset = _search_results_cache[image_path]
 
