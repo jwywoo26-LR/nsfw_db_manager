@@ -251,10 +251,7 @@ def create_search_tab():
                         height=800,
                         object_fit="scale-down",
                         show_label=False,
-                        preview=False,
-                        selected_index=None,
-                        allow_preview=False,
-                        interactive=False
+                        preview=False
                     )
 
             # Right column: Selected Image Details (takes remaining space)
