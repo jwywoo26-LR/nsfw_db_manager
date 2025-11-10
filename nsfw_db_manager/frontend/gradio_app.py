@@ -45,25 +45,33 @@ def upload_image(
         if file is None:
             return "❌ Please select an image file", None
 
-        # Prepare the file and form data
+        # Validation: angle_2, action_1, and prompt are required
+        if not angle_2 or not angle_2.strip():
+            return "❌ Angle 2 is required", None
+        if not action_1 or not action_1.strip():
+            return "❌ Action 1 is required", None
+        if not prompt or not prompt.strip():
+            return "❌ Prompt is required", None
+
+        # Prepare the file and query parameters
         files = {'file': open(file, 'rb')}
-        data = {}
+        params = {}
 
         if angle_1:
-            data['angle_1'] = angle_1
+            params['angle_1'] = angle_1
         if angle_2:
-            data['angle_2'] = angle_2
+            params['angle_2'] = angle_2
         if action_1:
-            data['action_1'] = action_1
+            params['action_1'] = action_1
         if action_2:
-            data['action_2'] = action_2
+            params['action_2'] = action_2
         if action_3:
-            data['action_3'] = action_3
+            params['action_3'] = action_3
         if prompt:
-            data['prompt'] = prompt
+            params['prompt'] = prompt
 
         # Send request to backend
-        response = requests.post(f"{API_URL}/api/upload", files=files, data=data)
+        response = requests.post(f"{API_URL}/api/upload", files=files, params=params)
 
         if response.status_code == 200:
             result = response.json()
@@ -361,24 +369,24 @@ def process_bulk_upload(zip_file) -> Tuple[str, str]:
                 # Upload to backend
                 with open(resolved_path, 'rb') as f:
                     files = {'file': (resolved_path.name, f, 'image/png')}
-                    data = {
+                    params = {
                         'angle_1': angle_1,
                         'angle_2': angle_2,
                     }
 
                     if action_1:
-                        data['action_1'] = action_1
+                        params['action_1'] = action_1
                     if action_2:
-                        data['action_2'] = action_2
+                        params['action_2'] = action_2
                     if action_3:
-                        data['action_3'] = action_3
+                        params['action_3'] = action_3
                     if prompt:
-                        data['prompt'] = prompt
+                        params['prompt'] = prompt
 
                     response = requests.post(
                         f"{API_URL}/api/upload",
                         files=files,
-                        data=data,
+                        params=params,
                         timeout=30
                     )
 
@@ -445,21 +453,21 @@ with gr.Blocks(title="NSFW Image Asset Manager", theme=gr.themes.Soft()) as app:
                     with gr.Row():
                         upload_angle_1 = gr.Dropdown(
                             choices=ANGLE_1_OPTIONS,
-                            label="Angle 1",
+                            label="Angle 1 (Optional)",
                             allow_custom_value=True
                         )
                         upload_angle_2 = gr.Dropdown(
                             choices=ANGLE_2_OPTIONS,
-                            label="Angle 2",
+                            label="Angle 2 (Required)",
                             allow_custom_value=True
                         )
                         # TODO: Replace with Dropdown when ACTION options are defined
                         # upload_action_1 = gr.Dropdown(choices=ACTION_1_OPTIONS, label="Action 1", allow_custom_value=True)
-                        upload_action_1 = gr.Textbox(label="Action 1", placeholder="Required")
-                        upload_action_2 = gr.Textbox(label="Action 2", placeholder="Optional")
-                        upload_action_3 = gr.Textbox(label="Action 3", placeholder="Optional")
+                        upload_action_1 = gr.Textbox(label="Action 1 (Required)", placeholder="Required")
+                        upload_action_2 = gr.Textbox(label="Action 2 (Optional)", placeholder="Optional")
+                        upload_action_3 = gr.Textbox(label="Action 3 (Optional)", placeholder="Optional")
 
-                    upload_prompt = gr.Textbox(label="Prompt", placeholder="Optional description or generation prompt", lines=2)
+                    upload_prompt = gr.Textbox(label="Prompt (Required)", placeholder="Required description or generation prompt", lines=2)
 
                     upload_btn = gr.Button("📤 Upload Image", variant="primary")
                     upload_output = gr.Textbox(label="Upload Status", interactive=False)
